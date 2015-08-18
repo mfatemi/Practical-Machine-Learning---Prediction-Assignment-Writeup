@@ -1,0 +1,100 @@
+---
+title: "Practical Machine Learning - Prediction Assignment Writeup"
+output: html_document
+---
+
+
+
+##Background
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
+
+```{r}
+library(caret)
+library(ggplot2)
+
+options(warn=-1)
+set.seed(2112)
+```
+
+##load data
+load data and replace '#DIV/0!' that  replace it with an NA value.
+we use training_data for trainung and test, pml-testing for validation
+```{r}
+#download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", destfile = "./pml-training.csv")
+#download.file("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", destfile = "./pml-testing.csv")
+
+training_data <- read.csv("pml-training.csv", na.strings=c("#DIV/0!") )
+evaluation_data <- read.csv("pml-testing.csv", na.strings=c("#DIV/0!") )
+
+#summary(training_data)
+#summary testing_data
+
+```
+
+##Preprocessing data
+1. convert all columns to numeric
+2. remove columns with NA or empty values
+3. remove name, timestamps and windows
+```{r}
+
+for(i in c(8:ncol(training_data)-1)) {training_data[,i] = as.numeric(as.character(training_data[,i]))}
+for(i in c(8:ncol(evaluation_data)-1)) {evaluation_data[,i] = as.numeric(as.character(evaluation_data[,i]))}
+
+feature_columns<-colnames(training_data[colSums(is.na(training_data)) == 0])
+feature_columns<-feature_columns[-(1:7)]
+
+model_data <- training_data[feature_columns]
+
+```
+
+##Partitioning data
+```{r}
+datapart<- createDataPartition(y=model_data$classe, p=0.75, list=FALSE )
+dp_training <- model_data[datapart,]
+dp_testing <- model_data[-datapart,]
+```
+
+## Modelling
+Training and preprocessing the prediction variables by centering and scaling.
+```{r}
+#preProc_data<- preProcess(dp_training)
+model<-train(classe~.,data=dp_training,method='gbm',preProcess='pca')
+
+```
+
+Testing
+```{r}
+pred<-predict(model,dp_testing)
+
+confusionMatrix(pred,dp_testing$classe)
+
+```
+
+
+
+
+##Conclusions and  Data Submit
+
+```{r}
+
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+
+x <- evaluation_data
+x <- x[feature_columns[feature_columns!='classe']]
+ <- predict(model, newdata=x)
+
+
+pml_write_files(answers)
+
+```
+
+The predicted classes for the 20 tests are: ```{r} answers ```
+
+
