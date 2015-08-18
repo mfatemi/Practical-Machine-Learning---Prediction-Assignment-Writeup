@@ -48,7 +48,8 @@ model_data <- training_data[feature_columns]
 
 ```
 
-##Partitioning data
+##Partitioning Data into Testing and Cross-Validation
+To find an optimal model, with the best performance both in Accuracy as well as minimizing Out of Sample Error, the full testing data is split randomly with a set seed with 75% of the data into the training sample and 25% of the data used as cross-validation. 
 ```{r}
 datapart<- createDataPartition(y=model_data$classe, p=0.75, list=FALSE )
 dp_training <- model_data[datapart,]
@@ -63,7 +64,7 @@ model<-train(classe~.,data=dp_training,method='gbm',preProcess='pca')
 
 ```
 
-Testing
+##Predictions Against Cross Validation Data
 ```{r}
 pred<-predict(model,dp_testing)
 
@@ -71,6 +72,7 @@ confusionMatrix(pred,dp_testing$classe)
 
 ```
 
+The accuracy of the model is 0.9877. The out of sample error is 1-accuracy for predictions made against the cross-validation set.
 
 
 
