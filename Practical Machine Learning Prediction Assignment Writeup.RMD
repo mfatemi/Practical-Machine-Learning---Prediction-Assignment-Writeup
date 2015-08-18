@@ -88,7 +88,7 @@ pml_write_files = function(x){
 
 x <- evaluation_data
 x <- x[feature_columns[feature_columns!='classe']]
- <- predict(model, newdata=x)
+answers <- predict(model, newdata=x)
 
 
 pml_write_files(answers)
@@ -96,3 +96,5 @@ pml_write_files(answers)
 ```
 
 The predicted classes for the 20 tests are: ```{r} answers ```
+
+
