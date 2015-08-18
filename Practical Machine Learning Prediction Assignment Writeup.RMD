@@ -96,5 +96,3 @@ pml_write_files(answers)
 ```
 
 The predicted classes for the 20 tests are: ```{r} answers ```
-
-
